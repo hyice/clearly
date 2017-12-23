@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import wx
-import preview
+import frame
 import os
 
 
@@ -21,7 +21,7 @@ def main():
 
     path = show_file_chooser()
     if path:
-        preview.PreviewFrame(path).Show()
+        frame.PreviewFrame(path).Show()
 
     app.MainLoop()
 

@@ -12,6 +12,8 @@ name = "pypi"
 [packages]
 
 wxpython = "*"
+opencv-python = "*"
+numpy = "*"
 
 
 [requires]
