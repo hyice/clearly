@@ -161,10 +161,10 @@ class ImageHelper(object):
     def scale(self, scale):
         if self._scale == scale:
             return
-
-        self.offset = (self.offset[0] / self.scale * scale, self.offset[1] / self.scale * scale)
-
+        ori_scale = self.scale
         self._scale = scale
+
+        self.offset = (self.offset[0] / ori_scale * scale, self.offset[1] / ori_scale * scale)
 
     @property
     def display_size(self):
@@ -186,13 +186,17 @@ class ImageHelper(object):
         dx, dy = value
         image_size = self.scaled_image_size
         width_gap = (image_size.width - self.display_size.width) / 2.0
-        if dx + width_gap < 0:
+        if width_gap <= 0:
+            dx = 0
+        elif dx + width_gap < 0:
             dx = -width_gap
         elif dx - width_gap > 0:
             dx = width_gap
 
         height_gap = (image_size.height - self.display_size.height) / 2.0
-        if dy + height_gap < 0:
+        if height_gap <= 0:
+            dy = 0
+        elif dy + height_gap < 0:
             dy = -height_gap
         elif dy - height_gap > 0:
             dy = height_gap
