@@ -13,7 +13,8 @@ class PreviewFrame(wx.Frame):
         self._bind_events()
 
     def Show(self, show=True):
-        self.ShowFullScreen(show)
+        super(PreviewFrame, self).Show(show)
+        self.Maximize()
 
     # ----------------------------------------
     # 事件绑定
