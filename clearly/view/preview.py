@@ -27,7 +27,8 @@ class PreviewPanel(wx.Panel):
     @scale.setter
     def scale(self, value):
         self._scale = value
-        self._bitmap.update_image(self._image_helper.image_with_scale(self._scale))
+        self._bitmap.image = self._image_helper.image_with_scale(self._scale)
+        self._reposition_bitmap()
 
     def _full_fill_scale(self):
         view_size = self.GetSize()
@@ -38,15 +39,25 @@ class PreviewPanel(wx.Panel):
 
         return min(width_scale, height_scale)
 
+    def _reposition_bitmap(self):
+        view_size = self.GetSize()
+        image_size = self._bitmap.image.GetSize()
+
+        position = wx.Point(
+            (view_size.Width - image_size.Width) / 2.0,
+            (view_size.Height - image_size.Height) / 2.0
+        )
+
+        self._bitmap.SetSize(image_size)
+        self._bitmap.SetPosition(position)
+
+        self.Layout()
+
     # -----------------------------------
     #  初始化
 
     def _init_views(self):
         self._bitmap = view.StaticBitmap(self)
-
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self._bitmap, -1, wx.EXPAND)
-        self.SetSizer(sizer)
 
     def _bind_events(self):
         self.Bind(wx.EVT_SIZE, self._on_size_change)
@@ -54,7 +65,6 @@ class PreviewPanel(wx.Panel):
 
     def _on_size_change(self, event):
         self.scale = self._full_fill_scale()
-        print(self.scale)
         event.Skip()
 
     def _on_scale_change(self, event):

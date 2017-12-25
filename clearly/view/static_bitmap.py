@@ -5,16 +5,17 @@ import wx
 
 
 class StaticBitmap(wx.StaticBitmap):
-    def __init__(self, parent):
-        wx.StaticBitmap.__init__(self, parent)
+    def __init__(self, *args, **kwargs):
+        wx.StaticBitmap.__init__(self,*args, **kwargs)
 
-    # ---------------------------------------------------
-    # 更新图片
+        self._image = None
 
-    def update_image(self, image):
-        """ 更新图片, 自动调整图片尺寸以适应窗口大小
-        :type image: wx.Image
-        """
-        bitmap = image.ConvertToBitmap()
+    @property
+    def image(self) -> wx.Image:
+        return self._image
+
+    @image.setter
+    def image(self, image: wx.Image):
+        self._image = image
+        bitmap = self._image.ConvertToBitmap()
         self.SetBitmap(bitmap)
-
