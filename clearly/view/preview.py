@@ -219,3 +219,40 @@ class ImageHelper(object):
         image_data = scaled_image.tostring()
         wx_image.SetData(image_data)
         return wx_image
+
+
+class DashRect(wx.Panel):
+    def __init__(self, *args, **kwargs):
+        wx.Panel.__init__(self, *args, **kwargs)
+
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_timer, self.timer)
+        self.timer.Start(800)
+
+        self._black_dash = True
+
+    def _on_paint(self, event):
+        dc = wx.PaintDC(self)
+        self._draw(dc)
+
+    def _on_timer(self, event):
+        dc = wx.ClientDC(self)
+        self._draw(dc)
+
+    def _draw(self, dc):
+        solid_pen = wx.Pen('#4c4c4c' if self._black_dash else '#ffffff', 1, wx.SOLID)
+
+        dash_pen = wx.Pen('#ffffff' if self._black_dash else '#4c4c4c', 1, wx.USER_DASH)
+        dash_pen.SetDashes([6, 8])
+
+        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+
+        dc.SetPen(solid_pen)
+        dc.DrawRectangle((0, 0), self.GetSize())
+
+        dc.SetPen(dash_pen)
+        dc.DrawRectangle((0, 0), self.GetSize())
+
+        self._black_dash = not self._black_dash
