@@ -11,10 +11,16 @@ class PreviewPanel(wx.Panel):
     def __init__(self, parent, image_path):
         wx.Panel.__init__(self, parent)
 
-        self._last_drag_point = None
-
         self._init_views()
         self._bind_events()
+
+        self._last_drag_point = None
+        self._is_moving = False
+
+        self._is_selecting = False
+        self._selecting_start_point = None
+        self._selection_view = DashRect(self, size=(0, 0))
+        self._selection_view.Disable()
 
         self._image_helper = ImageHelper(image_path)
         self._update_bitmap()
@@ -65,10 +71,11 @@ class PreviewPanel(wx.Panel):
     # -----------------------------------
     # 图片平移
 
-    def start_moving(self, point):
+    def _start_moving(self, point):
+        self._is_moving = True
         self._last_drag_point = point
 
-    def moving_to(self, point):
+    def _moving_to(self, point):
         dx, dy = point - self._last_drag_point
         x_unit = self.GetSize().width >> 7
         y_unit = self.GetSize().height >> 7
@@ -82,24 +89,70 @@ class PreviewPanel(wx.Panel):
         if ori_offset != self._image_helper.offset:
             self._update_bitmap(self._image_helper.scale)
 
-    def end_moving(self, point):
-        self.moving_to(point)
+    def _end_moving(self, point):
+        self._moving_to(point)
         self._last_drag_point = None
+        self._is_moving = False
+
+    # ------------------------------------
+    # 选择区域
+
+    def _start_selecting(self, point):
+        point = self._valid_selecting_point(point)
+
+        self._is_selecting = True
+        self._selecting_start_point = point
+
+        self._selection_view.SetRect((point.x, point.y, 0, 0))
+        self._selection_view.Show()
+
+    def _selecting_to(self, point):
+        point = self._valid_selecting_point(point)
+
+        x = min(point.x, self._selecting_start_point.x)
+        width = abs(point.x - self._selecting_start_point.x)
+        y = min(point.y, self._selecting_start_point.y)
+        height = abs(point.y - self._selecting_start_point.y)
+
+        self._selection_view.SetRect((x, y, width, height))
+
+    def _end_selecting(self, point):
+        point = self._valid_selecting_point(point)
+
+        self._selecting_to(point)
+        self._selection_view.start_animation()
+        self._is_selecting = False
+
+    def _hide_selection(self):
+        self._selection_view.stop_animation()
+        self._selection_view.Hide()
+
+    def _valid_selecting_point(self, point):
+        x, y = point
+        x_min, y_min, width, height = self._bitmap.GetRect()
+        x_max = x_min + width
+        y_max = y_min + height
+
+        x = min(x_max, max(x, x_min))
+        y = min(y_max, max(y, y_min))
+
+        return wx.Point(x, y)
 
     # -----------------------------------
     #  初始化
 
     def _init_views(self):
         self._bitmap = view.StaticBitmap(self)
+        self._bitmap.Disable()
 
     def _bind_events(self):
         self.Bind(wx.EVT_SIZE, self._on_size_change)
 
         self.Bind(wx.EVT_MOUSEWHEEL, self._on_scale_change)
 
-        self._bitmap.Bind(wx.EVT_LEFT_DOWN, self._on_left_mouse_down)
-        self._bitmap.Bind(wx.EVT_MOTION, self._on_mouse_move)
-        self._bitmap.Bind(wx.EVT_LEFT_UP, self._on_left_mouse_up)
+        self.Bind(wx.EVT_LEFT_DOWN, self._on_left_mouse_down)
+        self.Bind(wx.EVT_MOTION, self._on_mouse_move)
+        self.Bind(wx.EVT_LEFT_UP, self._on_left_mouse_up)
 
     def _on_size_change(self, event):
         self._update_bitmap()
@@ -108,19 +161,34 @@ class PreviewPanel(wx.Panel):
     def _on_scale_change(self, event):
         rotation = event.GetWheelRotation()
         self._scale_image(rotation > 0)
+        self._hide_selection()
         event.Skip()
 
     def _on_left_mouse_down(self, event):
-        self.start_moving(event.GetPosition())
+        is_control_down = event.ControlDown()
+        self._hide_selection()
+        if is_control_down:
+            self._start_selecting(event.GetPosition())
+        else:
+            self._start_moving(event.GetPosition())
         event.Skip()
 
     def _on_mouse_move(self, event):
-        if event.Dragging() and event.LeftIsDown():
-            self.moving_to(event.GetPosition())
+        if self._is_moving:
+            self._moving_to(event.GetPosition())
+
+        if self._is_selecting:
+            self._selecting_to(event.GetPosition())
+
         event.Skip()
 
     def _on_left_mouse_up(self, event):
-        self.end_moving(event.GetPosition())
+        if self._is_moving:
+            self._end_moving(event.GetPosition())
+
+        if self._is_selecting:
+            self._end_selecting(event.GetPosition())
+
         event.Skip()
 
 
@@ -223,15 +291,20 @@ class ImageHelper(object):
 
 class DashRect(wx.Panel):
     def __init__(self, *args, **kwargs):
-        wx.Panel.__init__(self, *args, **kwargs)
+        wx.Panel.__init__(self, style=wx.TRANSPARENT_WINDOW, *args, **kwargs)
 
         self.Bind(wx.EVT_PAINT, self._on_paint)
 
-        self.timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self._on_timer, self.timer)
-        self.timer.Start(800)
+        self._timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_timer, self._timer)
 
         self._black_dash = True
+
+    def start_animation(self):
+        self._timer.Start(800)
+
+    def stop_animation(self):
+        self._timer.Stop()
 
     def _on_paint(self, event):
         dc = wx.PaintDC(self)
