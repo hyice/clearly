@@ -36,18 +36,18 @@ class PreviewPanel(wx.Panel):
 
         self._update_bitmap(scale)
 
-    def _full_fill_scale(self):
+    def _default_scale(self):
         view_size = self.GetSize()
         image_size = self._image_helper.image_size
 
         width_scale = view_size.width * 1.0 / image_size.width
         height_scale = view_size.height * 1.0 / image_size.height
 
-        return min(width_scale, height_scale)
+        return min(width_scale, height_scale) * 0.8
 
     def _update_bitmap(self, scale=None):
         if not scale:
-            scale = self._full_fill_scale()
+            scale = self._default_scale()
 
         self._image_helper.scale = scale
 
