@@ -3,3 +3,4 @@
 
 from view.static_bitmap import StaticBitmap
 from view.preview import PreviewPanel
+from view.menu import Menu

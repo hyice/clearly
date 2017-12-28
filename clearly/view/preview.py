@@ -8,7 +8,7 @@ import numpy as np
 
 
 class PreviewPanel(wx.Panel):
-    def __init__(self, parent, image_path):
+    def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
         self._init_views()
@@ -22,7 +22,10 @@ class PreviewPanel(wx.Panel):
         self._selection_view = DashRect(self, size=(0, 0))
         self._selection_view.Disable()
 
-        self._image_helper = ImageHelper(image_path)
+        self._image_helper = None
+
+    def update_image(self, image):
+        self._image_helper = ImageHelper(image)
         self._update_bitmap()
 
     # -----------------------------------
@@ -193,11 +196,8 @@ class PreviewPanel(wx.Panel):
 
 
 class ImageHelper(object):
-    def __init__(self, image_path):
-        self.__image_path = image_path
-
-        cv_image = cv2.imdecode(np.fromfile(self.__image_path, dtype=np.uint8), -1)
-        self._cv_rgb_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+    def __init__(self, image):
+        self._cv_rgb_image = image
 
         self._scale = None
         self._display_size = wx.Size(0, 0)
