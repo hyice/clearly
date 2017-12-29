@@ -4,7 +4,7 @@
 import wx
 import cv2
 import view
-import numpy as np
+import math
 
 
 class PreviewPanel(wx.Panel):
@@ -25,6 +25,8 @@ class PreviewPanel(wx.Panel):
         self._image_helper = None
 
     def update_image(self, image):
+        self._hide_selection()
+
         self._image_helper = ImageHelper(image)
         self._update_bitmap()
 
@@ -99,6 +101,22 @@ class PreviewPanel(wx.Panel):
 
     # ------------------------------------
     # 选择区域
+
+    def selection_area(self):
+        if not self._selection_view.IsShown():
+            return None
+
+        selection_x, selection_y, width, height = self._selection_view.GetRect()
+        bitmap_x, bitmap_y = self._bitmap.GetPosition()
+
+        scale = self._image_helper.scale
+
+        return (
+            math.ceil((selection_x - bitmap_x) / scale),
+            math.ceil((selection_y - bitmap_y) / scale),
+            math.ceil(width / scale),
+            math.ceil(height / scale)
+        )
 
     def _start_selecting(self, point):
         point = self._valid_selecting_point(point)

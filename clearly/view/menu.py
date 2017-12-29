@@ -13,12 +13,15 @@ class Menu(wx.Menu):
 
         self.Bind(wx.EVT_MENU, self._on_menu_clicked)
 
-    def append(self, title, handler, *args):
+    def append_item(self, title, handler, *args):
         item_id = wx.NewId()
         self._handlers[item_id] = handler
         self._params[item_id] = args
 
         self.Append(item_id, title)
+
+    def append_separator(self):
+        self.AppendSeparator()
 
     def _on_menu_clicked(self, event):
         item_id = event.GetId()

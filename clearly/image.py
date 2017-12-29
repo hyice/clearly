@@ -16,6 +16,11 @@ class CVImage(object):
     def image(self):
         return self._cv_rgb_image
 
+    @property
+    def size(self):
+        shape = self._cv_rgb_image.shape
+        return shape[1], shape[0]
+
     # -----------------------------
     # 旋转
 
@@ -27,6 +32,18 @@ class CVImage(object):
 
         self._cv_rgb_image = cv2.rotate(self._cv_rgb_image, rotateCode=rotate_code)
 
+    # ---------------------------------
+    # 裁剪
 
+    def crop(self, rect):
+        x, y, width, height = rect
+        image_width, image_height = self.size
+
+        x_min = max(0, x)
+        y_min = max(0, y)
+        x_max = min(image_width, x+width)
+        y_max = min(image_height, y+height)
+
+        self._cv_rgb_image = self._cv_rgb_image[y_min:y_max, x_min:x_max]
 
 

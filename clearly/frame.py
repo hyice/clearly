@@ -27,13 +27,21 @@ class PreviewFrame(wx.Frame):
 
     def _init_right_click_menu(self):
         menu = view.Menu()
-        menu.append('向左旋转', self._rotate_image)
-        menu.append('向右旋转', self._rotate_image, True)
+        menu.append_item('向左旋转', self._rotate_image)
+        menu.append_item('向右旋转', self._rotate_image, True)
+
+        menu.append_separator()
+        menu.append_item('裁剪', self._crop_image)
 
         self._right_click_menu = menu
 
     def _rotate_image(self, clockwise=False):
         self.cv_image.rotate(clockwise)
+        self.view.update_image(self.cv_image.image)
+
+    def _crop_image(self):
+        selection_rect = self.view.selection_area()
+        self.cv_image.crop(selection_rect)
         self.view.update_image(self.cv_image.image)
 
     # ----------------------------------------
