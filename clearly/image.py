@@ -4,6 +4,7 @@
 import cv2
 import numpy as np
 import os
+import math
 
 
 class CVImage(object):
@@ -63,6 +64,35 @@ class CVImage(object):
 
     def reverse_color(self):
         self._cv_rgb_image = 255 - self._cv_rgb_image
+
+    def compensate_light(self):
+        gray_image = cv2.cvtColor(self._cv_rgb_image, cv2.COLOR_RGB2GRAY)
+
+        image_row_count, image_col_count = gray_image.shape
+        average = np.mean(gray_image)
+
+        block_size = 50
+        block_row_count = int(math.ceil(image_row_count * 1.0 / block_size))
+        block_col_count = int(math.ceil(image_col_count * 1.0 / block_size))
+        block_gray_array = np.zeros((block_row_count, block_col_count))
+        for i in range(0, block_row_count):
+            min_row_index = i * block_size
+            max_row_index = (i + 1) * block_size
+            max_row_index = max_row_index if max_row_index < image_row_count else image_row_count
+
+            for j in range(0, block_col_count):
+                min_col_index = j * block_size
+                max_col_index = (j + 1) * block_size
+                max_col_index = max_col_index if max_col_index < image_col_count else image_col_count
+
+                block_gray_array[i, j] = np.mean(gray_image[min_row_index:max_row_index, min_col_index:max_col_index])
+
+        gray_gap_array = cv2.resize(block_gray_array - average, (image_col_count, image_row_count),
+                                    interpolation=cv2.INTER_CUBIC)
+        compensated_image = gray_image - gray_gap_array
+        compensated_image = compensated_image.astype(np.uint8)
+
+        self._cv_rgb_image = cv2.cvtColor(compensated_image, cv2.COLOR_GRAY2RGB)
 
 
 
