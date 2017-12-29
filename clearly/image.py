@@ -58,5 +58,11 @@ class CVImage(object):
         y_max = min(image_height, y + height)
         return x_min, y_min, x_max, y_max
 
+    # ---------------------------------------------
+    # 图片颜色相关操作
+
+    def reverse_color(self):
+        self._cv_rgb_image = 255 - self._cv_rgb_image
+
 
 

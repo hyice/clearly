@@ -36,6 +36,9 @@ class PreviewFrame(wx.Frame):
         menu.append_item('裁剪', self._crop_image)
         menu.append_item('清除', self._clear_image)
 
+        menu.append_separator()
+        menu.append_item('反色', self._reverse_image_color)
+
         self._right_click_menu = menu
 
     def _rotate_image(self, clockwise=False):
@@ -66,6 +69,15 @@ class PreviewFrame(wx.Frame):
         self.cv_image.clear(selection_rect)
         self.view.update_image(self.cv_image.image)
 
+    def _reverse_image_color(self):
+        self._is_modified = True
+        
+        self.cv_image.reverse_color()
+        self.view.update_image(self.cv_image.image)
+
+    # ------------------------------------------------
+    # 对话框
+
     def _show_crop_dialog(self):
         self._show_dialog('还未选择要裁剪区域！\n(请先按住 Ctrl 键拖动鼠标选择要裁剪的区域)')
 
@@ -76,6 +88,15 @@ class PreviewFrame(wx.Frame):
         dialog = wx.MessageDialog(self, message, '提示')
         dialog.ShowModal()
         dialog.Destroy()
+
+    def _show_save_confirm_dialog(self):
+        dialog = wx.MessageDialog(self, '要保存对此图像的修改吗？', '提示', wx.YES_NO | wx.CANCEL)
+        dialog.SetYesNoCancelLabels('保存', '不保存', '取消')
+
+        result = dialog.ShowModal()
+        dialog.Destroy()
+
+        return result
 
     # ----------------------------------------
     # 退出并保存
@@ -97,15 +118,6 @@ class PreviewFrame(wx.Frame):
 
     def _save(self):
         self.cv_image.save()
-
-    def _show_save_confirm_dialog(self):
-        dialog = wx.MessageDialog(self, '要保存对此图像的修改吗？', '提示', wx.YES_NO | wx.CANCEL)
-        dialog.SetYesNoCancelLabels('保存', '不保存', '取消')
-
-        result = dialog.ShowModal()
-        dialog.Destroy()
-
-        return result
 
     # ----------------------------------------
     # 事件绑定
