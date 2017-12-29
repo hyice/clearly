@@ -29,6 +29,9 @@ class PreviewFrame(wx.Frame):
 
     def _init_right_click_menu(self):
         menu = view.Menu()
+
+        menu.append_item('还原', self._reload_origin_image)
+
         menu.append_item('向左旋转', self._update_image_with_operator, self.cv_image.rotate)
         menu.append_item('向右旋转', self._update_image_with_operator, self.cv_image.rotate, True)
 
@@ -41,6 +44,11 @@ class PreviewFrame(wx.Frame):
         menu.append_item('亮度均衡', self._update_image_with_operator, self.cv_image.compensate_light)
 
         self._right_click_menu = menu
+
+    def _reload_origin_image(self):
+        self._is_modified = False
+        self.cv_image.reload()
+        self.view.update_image(self.cv_image.image)
 
     def _update_image_with_operator(self, operator, *args):
         self._is_modified = True

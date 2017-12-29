@@ -11,8 +11,8 @@ class CVImage(object):
     def __init__(self, file_path):
         self._file_path = file_path
 
-        cv_image = cv2.imdecode(np.fromfile(self._file_path, dtype=np.uint8), -1)
-        self._cv_rgb_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+        self._cv_rgb_image = None
+        self.reload()
 
     @property
     def image(self):
@@ -24,11 +24,15 @@ class CVImage(object):
         return shape[1], shape[0]
 
     # -----------------------------
-    # 保存
+    # 保存与加载
 
     def save(self):
         ext = os.path.splitext(self._file_path)[1]
         cv2.imencode(ext, self._cv_rgb_image)[1].tofile(self._file_path)
+
+    def reload(self):
+        cv_image = cv2.imdecode(np.fromfile(self._file_path, dtype=np.uint8), -1)
+        self._cv_rgb_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
     # -----------------------------
     # 旋转、裁剪、清除区域内容等基本操作
