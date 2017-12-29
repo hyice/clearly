@@ -77,13 +77,12 @@ class PreviewFrame(wx.Frame):
         dialog.ShowModal()
         dialog.Destroy()
 
-
     # ----------------------------------------
     # 退出并保存
 
     def _exit(self):
         if not self._is_modified:
-            self.Close()
+            self.Close(force=True)
             return
 
         result = self._show_save_confirm_dialog()
@@ -94,7 +93,7 @@ class PreviewFrame(wx.Frame):
         if result == wx.ID_YES:
             self._save()
 
-        self.Close()
+        self.Close(force=True)
 
     def _save(self):
         self.cv_image.save()
@@ -113,6 +112,7 @@ class PreviewFrame(wx.Frame):
 
     def _bind_events(self):
         self.view.Bind(wx.EVT_KEY_DOWN, self._handle_key_press)
+        self.Bind(wx.EVT_CLOSE, self._on_close_window)
 
         self.view.Bind(wx.EVT_RIGHT_DOWN, self._on_right_mouse_down)
 
@@ -122,6 +122,14 @@ class PreviewFrame(wx.Frame):
             self._exit()
 
         event.Skip()
+
+    def _on_close_window(self, event):
+        if not event.CanVeto():
+            event.Skip()
+            return
+
+        event.Veto()
+        self._exit()
 
     def _on_right_mouse_down(self, event):
         self.view.PopupMenu(self._right_click_menu, event.GetPosition())
