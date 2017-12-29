@@ -14,6 +14,8 @@ class PreviewFrame(wx.Frame):
         self.view = view.PreviewPanel(self)
         self.view.update_image(self.cv_image.image)
 
+        self._is_modified = False
+
         self._init_right_click_menu()
 
         self._bind_events()
@@ -36,13 +38,47 @@ class PreviewFrame(wx.Frame):
         self._right_click_menu = menu
 
     def _rotate_image(self, clockwise=False):
+        self._is_modified = True
+
         self.cv_image.rotate(clockwise)
         self.view.update_image(self.cv_image.image)
 
     def _crop_image(self):
+        self._is_modified = True
+
         selection_rect = self.view.selection_area()
         self.cv_image.crop(selection_rect)
         self.view.update_image(self.cv_image.image)
+
+    # ----------------------------------------
+    # 退出并保存
+
+    def _exit(self):
+        if not self._is_modified:
+            self.Close()
+            return
+
+        result = self._show_save_confirm_dialog()
+
+        if result == wx.ID_CANCEL:
+            return
+
+        if result == wx.ID_YES:
+            self._save()
+
+        self.Close()
+
+    def _save(self):
+        self.cv_image.save()
+
+    def _show_save_confirm_dialog(self):
+        dialog = wx.MessageDialog(self, '要保存对此图像的修改吗？', '提示', wx.YES_NO | wx.CANCEL)
+        dialog.SetYesNoCancelLabels('保存', '不保存', '取消')
+
+        result = dialog.ShowModal()
+        dialog.Destroy()
+
+        return result
 
     # ----------------------------------------
     # 事件绑定
@@ -55,7 +91,7 @@ class PreviewFrame(wx.Frame):
     def _handle_key_press(self, event):
         key_code = event.GetKeyCode()
         if key_code == wx.WXK_ESCAPE:  # ESC 键退出程序
-            self.Close()
+            self._exit()
 
         event.Skip()
 

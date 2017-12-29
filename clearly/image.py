@@ -3,6 +3,7 @@
 
 import cv2
 import numpy as np
+import os
 
 
 class CVImage(object):
@@ -20,6 +21,13 @@ class CVImage(object):
     def size(self):
         shape = self._cv_rgb_image.shape
         return shape[1], shape[0]
+
+    # -----------------------------
+    # 保存
+
+    def save(self):
+        ext = os.path.splitext(self._file_path)[1]
+        cv2.imencode(ext, self._cv_rgb_image)[1].tofile(self._file_path)
 
     # -----------------------------
     # 旋转
