@@ -30,7 +30,7 @@ class CVImage(object):
         cv2.imencode(ext, self._cv_rgb_image)[1].tofile(self._file_path)
 
     # -----------------------------
-    # 旋转
+    # 旋转、裁剪、清除区域内容等基本操作
 
     def rotate(self, clockwise=False):
         if clockwise:
@@ -40,18 +40,23 @@ class CVImage(object):
 
         self._cv_rgb_image = cv2.rotate(self._cv_rgb_image, rotateCode=rotate_code)
 
-    # ---------------------------------
-    # 裁剪
-
     def crop(self, rect):
+        x_min, y_min, x_max, y_max = self.valid_operation_rect(rect)
+        self._cv_rgb_image = self._cv_rgb_image[y_min:y_max, x_min:x_max]
+
+    def clear(self, rect):
+        x_min, y_min, x_max, y_max = self.valid_operation_rect(rect)
+        self._cv_rgb_image[y_min:y_max, x_min:x_max] = 255
+
+    def valid_operation_rect(self, rect):
         x, y, width, height = rect
         image_width, image_height = self.size
 
         x_min = max(0, x)
         y_min = max(0, y)
-        x_max = min(image_width, x+width)
-        y_max = min(image_height, y+height)
+        x_max = min(image_width, x + width)
+        y_max = min(image_height, y + height)
+        return x_min, y_min, x_max, y_max
 
-        self._cv_rgb_image = self._cv_rgb_image[y_min:y_max, x_min:x_max]
 
 
