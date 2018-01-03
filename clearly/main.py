@@ -4,6 +4,7 @@
 import wx
 import frame
 import os
+import sys
 
 
 def show_file_chooser(parent=None, title=u'选择文件', wildcard="*"):
@@ -19,7 +20,12 @@ def show_file_chooser(parent=None, title=u'选择文件', wildcard="*"):
 def main():
     app = wx.App()
 
-    path = show_file_chooser()
+    argv = sys.argv
+    if len(argv) <= 1:
+        path = show_file_chooser()
+    else:
+        path = argv[1]
+
     if path:
         frame.PreviewFrame(path).Show()
 
