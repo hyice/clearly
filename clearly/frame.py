@@ -32,6 +32,7 @@ class PreviewFrame(wx.Frame):
 
         menu.append_item('还原', self._reload_origin_image)
 
+        menu.append_separator()
         menu.append_item('向左旋转', self._update_image_with_operator, self.cv_image.rotate)
         menu.append_item('向右旋转', self._update_image_with_operator, self.cv_image.rotate, True)
 
@@ -40,8 +41,12 @@ class PreviewFrame(wx.Frame):
         menu.append_item('清除', self._update_image_with_operator, self._clear_image)
 
         menu.append_separator()
+        menu.append_item('自动漂白', self._update_image_with_operator, self.cv_image.auto_make_whiter)
         menu.append_item('反色', self._update_image_with_operator, self.cv_image.reverse_color)
-        menu.append_item('亮度均衡', self._update_image_with_operator, self.cv_image.compensate_light)
+
+        color_related_menu = view.Menu()
+        color_related_menu.append_item('亮度均衡', self._update_image_with_operator, self.cv_image.compensate_light)
+        menu.append_sub_menu('高级', color_related_menu)
 
         self._right_click_menu = menu
 

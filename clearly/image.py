@@ -66,6 +66,23 @@ class CVImage(object):
     # ---------------------------------------------
     # 图片颜色相关操作
 
+    def auto_make_whiter(self):
+        self.compensate_light()
+
+        hist = cv2.calcHist([self._cv_rgb_image], [0], None, [256], [0, 255])
+        _, max_val, _, max_loc = cv2.minMaxLoc(hist)
+
+        index = 255
+        for index in range(int(max_loc[1]), 0, -1):
+            intensity = hist[index][0]
+            rate = intensity / max_val
+            if rate < 0.05:
+                break
+
+        gray_image = cv2.cvtColor(self._cv_rgb_image, cv2.COLOR_RGB2GRAY)
+        gray_image[gray_image > index] = 255
+        self._cv_rgb_image = cv2.cvtColor(gray_image, cv2.COLOR_GRAY2RGB)
+
     def reverse_color(self):
         self._cv_rgb_image = 255 - self._cv_rgb_image
 
@@ -97,6 +114,18 @@ class CVImage(object):
         compensated_image = compensated_image.astype(np.uint8)
 
         self._cv_rgb_image = cv2.cvtColor(compensated_image, cv2.COLOR_GRAY2RGB)
+
+    def hist(self):
+        hist = cv2.calcHist([self._cv_rgb_image], [0], None, [256], [0, 255])
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(hist)
+        hist_img = np.zeros([256, 256, 3], np.uint8)
+        hpt = int(0.9 * 256)
+
+        for h in range(256):
+            intensity = int(hist[h] * hpt / max_val)
+            cv2.line(hist_img, (h, 256), (h, 256 - intensity), [255, 255, 255])
+
+        return hist_img
 
 
 
