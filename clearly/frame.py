@@ -4,6 +4,7 @@
 import wx
 import view
 import image
+import printer
 
 
 class PreviewFrame(wx.Frame):
@@ -21,8 +22,7 @@ class PreviewFrame(wx.Frame):
         self._bind_events()
 
     def Show(self, show=True):
-        super(PreviewFrame, self).Show(show)
-        self.Maximize()
+        self.ShowFullScreen(show)
 
     # ----------------------------------------
     # 菜单
@@ -31,6 +31,7 @@ class PreviewFrame(wx.Frame):
         menu = view.Menu()
 
         menu.append_item('还原', self._reload_origin_image)
+        menu.append_item('打印', self._printout)
 
         menu.append_separator()
         menu.append_item('向左旋转', self._update_image_with_operator, self.cv_image.rotate)
@@ -48,12 +49,18 @@ class PreviewFrame(wx.Frame):
         color_related_menu.append_item('亮度均衡', self._update_image_with_operator, self.cv_image.compensate_light)
         menu.append_sub_menu('高级', color_related_menu)
 
+        menu.append_separator()
+        menu.append_item('退出', self._exit)
+
         self._right_click_menu = menu
 
     def _reload_origin_image(self):
         self._is_modified = False
         self.cv_image.reload()
         self.view.update_image(self.cv_image.image)
+
+    def _printout(self):
+        wx.Printer().Print(self, printer.ImagePrintout(self.cv_image.image), prompt=False)
 
     def _update_image_with_operator(self, operator, *args):
         self._is_modified = True
