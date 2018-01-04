@@ -28,7 +28,8 @@ class CVImage(object):
 
     def save(self):
         ext = os.path.splitext(self._file_path)[1]
-        cv2.imencode(ext, self._cv_rgb_image)[1].tofile(self._file_path)
+        image = cv2.cvtColor(self._cv_rgb_image, cv2.COLOR_RGB2BGR)
+        cv2.imencode(ext, image)[1].tofile(self._file_path)
 
     def reload(self):
         cv_image = cv2.imdecode(np.fromfile(self._file_path, dtype=np.uint8), -1)
