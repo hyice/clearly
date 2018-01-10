@@ -139,8 +139,12 @@ class PreviewFrame(wx.Frame):
 
     def _handle_key_press(self, event):
         key_code = event.GetKeyCode()
+        
         if key_code == wx.WXK_ESCAPE:  # ESC 键退出程序
             self._exit()
+
+        if key_code == wx.WXK_DELETE:  # 清除选中区域的快捷键
+            self._update_image_with_operator(self._clear_image)
 
         event.Skip()
 
