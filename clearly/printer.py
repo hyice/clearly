@@ -33,14 +33,14 @@ class ImagePrintout(wx.Printout):
         wx_image.SetData(image_data)
 
         if full_fill_scale_after_rotate > full_fill_scale:
-            wx_image = wx_image.Rotate90().Scale(image_height * full_fill_scale_after_rotate,
-                                                 image_width * full_fill_scale_after_rotate)
+            wx_image = wx_image.Rotate90(False).Scale(image_height * full_fill_scale_after_rotate,
+                                                      image_width * full_fill_scale_after_rotate)
         else:
             wx_image = wx_image.Scale(image_width * full_fill_scale, image_height * full_fill_scale)
 
         self._bitmap = wx_image.ConvertToBitmap()
 
-    def OnPrintPage(self, pageNum):
+    def OnPrintPage(self, page_num):
         dc = self.GetDC()
 
         dc.SetPen(wx.Pen('black', 0))

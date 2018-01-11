@@ -139,7 +139,7 @@ class PreviewFrame(wx.Frame):
 
     def _handle_key_press(self, event):
         key_code = event.GetKeyCode()
-        
+
         if key_code == wx.WXK_ESCAPE:  # ESC 键退出程序
             self._exit()
 
