@@ -19,7 +19,7 @@ class Menu(wx.Menu):
         self.handlers[item_id] = handler
         self.params[item_id] = args
 
-        menu_item = self.Append(item_id, title)
+        return self.Append(item_id, title)
 
     def append_separator(self):
         self.AppendSeparator()

@@ -9,7 +9,7 @@ import printer
 
 class PreviewFrame(wx.Frame):
     def __init__(self, file_path):
-        wx.Frame.__init__(self, None, -1, size=(500, 500))
+        wx.Frame.__init__(self, None, -1, size=(800, 600))
 
         self.cv_image = image.CVImage(file_path)
         self.view = view.PreviewPanel(self)
@@ -22,6 +22,8 @@ class PreviewFrame(wx.Frame):
         self._bind_events()
 
     def Show(self, show=True):
+        super(PreviewFrame, self).Show(show)
+
         self.ShowFullScreen(show)
 
     # ----------------------------------------
@@ -50,6 +52,7 @@ class PreviewFrame(wx.Frame):
         menu.append_sub_menu('高级', color_related_menu)
 
         menu.append_separator()
+        menu.append_item('全屏/退出全屏', self._full_screen_change)
         menu.append_item('退出', self._exit)
 
         self._right_click_menu = menu
@@ -83,6 +86,13 @@ class PreviewFrame(wx.Frame):
             return
 
         self.cv_image.clear(selection_rect)
+
+    def _full_screen_change(self):
+        if self.IsFullScreen():
+            self.ShowFullScreen(False)
+            self.Center()
+        else:
+            self.ShowFullScreen(True)
 
     # ------------------------------------------------
     # 对话框
